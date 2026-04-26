@@ -30,6 +30,8 @@ def random_search(file_path, budget, output_file):
     best_performance = -np.inf if maximization else np.inf
     best_solution = []
 
+    budget_since_best = 0
+
     # Store all search results
     search_results = []
 
@@ -51,15 +53,19 @@ def random_search(file_path, budget, output_file):
             # Non-existing configuration
             performance = worst_value
 
+        budget_since_best += 1
+
         # Update the best solution
         if maximization:
             if performance > best_performance:
                 best_performance = performance
                 best_solution = sampled_config
+                budget_since_best = 0
         else:
             if performance < best_performance:
                 best_performance = performance
                 best_solution = sampled_config
+                budget_since_best = 0
 
         # Record the current search result
         search_results.append(sampled_config + [performance])
@@ -69,7 +75,7 @@ def random_search(file_path, budget, output_file):
     search_df = pd.DataFrame(search_results, columns=columns)
     search_df.to_csv(output_file, index=False)
 
-    return [int(x) for x in best_solution], best_performance
+    return [int(x) for x in best_solution], best_performance, budget_since_best
 
 
 # Main function to test on multiple datasets
@@ -83,11 +89,12 @@ def main():
     for file_name in os.listdir(datasets_folder):
         if file_name.endswith(".csv"):
             file_path = os.path.join(datasets_folder, file_name)
-            output_file = os.path.join(output_folder, f"{file_name.split('.')[0]}_search_results.csv")
-            best_solution, best_performance = random_search(file_path, budget, output_file)
+            output_file = os.path.join(output_folder, f"{file_name.split('.')[0]}_baseline.csv")
+            best_solution, best_performance, budget_since_best = random_search(file_path, budget, output_file)
             results[file_name] = {
                 "Best Solution": best_solution,
-                "Best Performance": best_performance
+                "Best Performance": best_performance,
+                "Budget Since Best": budget_since_best
             }
 
     # Print the results
@@ -95,6 +102,7 @@ def main():
         print(f"System: {system}")
         print(f"  Best Solution:    [{', '.join(map(str, result['Best Solution']))}]")
         print(f"  Best Performance: {result['Best Performance']}")
+        print(f"  Budget Since Best: {result['Budget Since Best']}")
 
 if __name__ == "__main__":
     main()
