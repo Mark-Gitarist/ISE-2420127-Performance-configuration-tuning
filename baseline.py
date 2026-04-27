@@ -35,7 +35,10 @@ def random_search(file_path, budget, output_file):
     # Store all search results
     search_results = []
 
-    for _ in range(budget):
+    remaining_budget = budget
+
+    # for _ in range(budget):
+    while remaining_budget > 0:
         # Randomly sample a configuration
         # For each configuration column, randomly select a value from the unique values available in the dataset
         # This ensures that the sampled configuration is within the valid domain of each parameter
@@ -49,26 +52,29 @@ def random_search(file_path, budget, output_file):
         if not matched_row.empty:
             # Existing configuration
             performance = matched_row[performance_column].iloc[0]
+            remaining_budget -= 1
+            budget_since_best += 1
+
+            # Update the best solution
+            if maximization:
+                if performance > best_performance:
+                    best_performance = performance
+                    best_solution = sampled_config
+                    budget_since_best = 0
+            else:
+                if performance < best_performance:
+                    best_performance = performance
+                    best_solution = sampled_config
+                    budget_since_best = 0
+
+            # Record the current search result
+            search_results.append(sampled_config + [performance])
+
         else:
             # Non-existing configuration
             performance = worst_value
 
-        budget_since_best += 1
 
-        # Update the best solution
-        if maximization:
-            if performance > best_performance:
-                best_performance = performance
-                best_solution = sampled_config
-                budget_since_best = 0
-        else:
-            if performance < best_performance:
-                best_performance = performance
-                best_solution = sampled_config
-                budget_since_best = 0
-
-        # Record the current search result
-        search_results.append(sampled_config + [performance])
 
     # Save the search results to a CSV file
     columns = list(config_columns) + ["Performance"]

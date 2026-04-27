@@ -51,7 +51,13 @@ def run_experiments():
             avg_tool_budget_since_best = np.mean(tool_best_budget)
             avg_baseline_budget_since_best = np.mean(baseline_best_budget)
 
-            _, p_val = stats.mannwhitneyu(tool_scores, baseline_scores, alternative='less')
+            _, p_val = stats.mannwhitneyu(tool_scores, baseline_scores)
+            
+            raw_scores_df = pd.DataFrame({
+                'Tool': tool_scores,
+                'Baseline': baseline_scores
+            })
+            raw_scores_df.to_csv(os.path.join(output_folder, f"{file_name}_raw_30_runs.csv"), index=False)
 
             summary.append({
                 "System": file_name,
@@ -60,8 +66,8 @@ def run_experiments():
                 "Tool_Std": round(std_tool, 5),
                 "Improvement %": round(((avg_baseline - avg_tool) / avg_baseline) * 100, 2),
                 "P-Value": round(p_val, 4),
-                "Avg Tool_Budget Since Best": round(avg_tool_budget_since_best, 2),
-                "Avg Baseline_Budget Since Best": round(avg_baseline_budget_since_best, 2)
+                "Avg Tool Best Budget": round(avg_tool_budget_since_best, 2),
+                "Avg Baseline Best Budget": round(avg_baseline_budget_since_best, 2)
             })
 
     summary_df = pd.DataFrame(summary)

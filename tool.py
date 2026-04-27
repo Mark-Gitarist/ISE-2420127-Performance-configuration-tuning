@@ -5,8 +5,6 @@ import os
 
 def evolutionary_search(data, budget, initial_percentage, output_file):
 
-    
-    
     initial_population = data.sample(int(budget* initial_percentage)).sort_values(data.columns[-1])
 
     current_best = initial_population.iloc[0].tolist()
@@ -33,7 +31,6 @@ def evolutionary_search(data, budget, initial_percentage, output_file):
 
         restart_limit = max(10, int(0.20 * remaining_budget))
         
-
         new_config = current_best_config.copy()
 
         for column in range(len(new_config)):
